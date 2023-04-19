@@ -6,12 +6,23 @@ import requests
 from bs4 import BeautifulSoup
 from config import Config
 from urllib.parse import urlparse, urljoin
+from urllib.request import urlopen
+import openai
+import certifi
+import json
 import openai
 import os
 
 summaries = []
 
 cfg = Config()
+
+FMP_KEY=os.getenv("FMP_KEY")
+
+#The company to summarize earnings
+symbol="FLNG"
+year="2022"
+quarter="4"
 
 # Function to check if the URL is valid
 def is_valid_url(url):
@@ -184,9 +195,8 @@ def summarize_text(text, question):
                 )
             
         summaries.append(response.choices[0].message["content"])
-        print("\n" + str(i) + " " + response.choices[0].message["content"])
+        #print("\n" + str(i) + " " + response.choices[0].message["content"])
 
-   
     combined_summary = "\n".join(summaries)
     if len(chunks) > 1 :
         messages = [create_message_final_summary(combined_summary, question)]
@@ -211,9 +221,15 @@ def get_text_summary(url, question):
     summary = summarize_text(text, question)
     return summary
 
+#Get the text to summarize
+url = "https://financialmodelingprep.com/api/v3/earning_call_transcript/"+symbol+"?quarter="+quarter+"&year="+year+"&apikey="+FMP_KEY
+response = urlopen(url, cafile=certifi.where())
+data = response.read().decode("utf-8")
+js = json.loads(data)
+fa=js[0]
+text=fa["content"]
 
-conclusion = get_text_summary("https://wtirealist.substack.com/p/frontera-lets-be-realistic?utm_source=post-email-title&publication_id=1114715&post_id=114436945&isFreemail=true&utm_medium=email","what are the main points")
-
+conclusion=summarize_text(text, "what are the main points")
 print("Executive summary: \n" + conclusion)
 print("\nDetailed summary :")
 for i in range(len(summaries)):
