@@ -20,7 +20,7 @@ cfg = Config()
 FMP_KEY=os.getenv("FMP_KEY")
 
 #The company to summarize earnings
-symbol="FLNG"
+symbol="AM"
 year="2022"
 quarter="4"
 
